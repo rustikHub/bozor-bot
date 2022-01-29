@@ -12,10 +12,23 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
+    maven {
+        url = uri("http://gitlab.ugnis.uz/api/v4/projects/253/packages/maven")
+        name = "GitLab"
+        isAllowInsecureProtocol = true
+        credentials(HttpHeaderCredentials::class) {
+            name = "Private-Token"
+            value = System.getenv("GITLAB_TOKEN")
+        }
+        authentication {
+            create<HttpHeaderAuthentication>("header")
+        }
+    }
     mavenCentral()
 }
 
 dependencies {
+    implementation("uz.rustik:test-lib:0.0.3-SNAPSHOT")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
