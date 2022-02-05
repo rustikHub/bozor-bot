@@ -2,10 +2,14 @@ package uz.rustik.bozorbot
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import uz.rustik.testlib.anotation.EnableBotConfig
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import uz.ugnis.tgbotlib.EnableTelegramBotAutoConfiguration
 
+@EnableJpaAuditing
 @SpringBootApplication
-@EnableBotConfig
+@EnableTelegramBotAutoConfiguration
+@EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl::class)
 class BozorBotApplication
 
 fun main(args: Array<String>) {
