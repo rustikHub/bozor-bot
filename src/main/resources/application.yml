@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/bozor-bot
+    username: postgres
+    password: 12345
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+      ddl-auto: update
+bot:
+  token: '5245848431:AAHF1_0SKGFnZHbQJnv4PemHMMTMhftE0Fo'
+  username: 'rustam_sklad_bot'
+root:
+  username: 'root'
+  password: '1234'
