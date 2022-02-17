@@ -14,6 +14,7 @@ import uz.rustik.bozorbot.MessageSourceService
 import uz.rustik.bozorbot.UserServiceImpl
 import uz.ugnis.tgbotlib.CallbackHandler
 import uz.ugnis.tgbotlib.answerCallBackQuery
+import uz.ugnis.tgbotlib.deleteMessage
 import uz.ugnis.tgbotlib.sendMessage
 import java.util.*
 
@@ -43,15 +44,16 @@ class ChooseLanguageCallbackHandler(
 
         when (keys[0]) {
             CallbackTypes.CHOOSE_LANGUAGE.name -> {
+                sender.deleteMessage(message.messageId, chatId)
                 val keyLang = keys[1]
                 chat.language = "en"
                 lang = Locale(keyLang)
                 answerCallbackQuery.text = messageSourceService.getMessage(LANGUAGE_CHANGED, Locale(chat.language))
-                sendMessage.text = messageSourceService.getMessage(ENTER_USERNAME,  Locale(chat.language))
+                sendMessage.text = messageSourceService.getMessage(ENTER_USERNAME, Locale(chat.language))
                 chat.chatStep = Steps.ENTER_USERNAME.name
                 chat.isNew = false
+                chat.botMessageId = sender.sendMessage(sendMessage)
                 myChatService.save(chat)
-                sender.sendMessage(sendMessage)
             }
         }
 

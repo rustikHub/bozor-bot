@@ -1,12 +1,10 @@
 package uz.rustik.bozorbot
 
 import org.hibernate.annotations.ColumnDefault
-import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import uz.ugnis.tgbotlib.Chat
+import java.sql.ResultSet
 import java.util.*
 import javax.persistence.*
 
@@ -16,40 +14,72 @@ open class BaseEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null,
     @CreatedDate @Temporal(TemporalType.TIMESTAMP) var createdDate: Date? = null,
     @LastModifiedDate @Temporal(TemporalType.TIMESTAMP) var modifiedDate: Date? = null,
-    @CreatedBy var createdBy: String? = null,
-    @LastModifiedBy var lastModifiedBy: String? = null,
     @Column(nullable = false) @ColumnDefault(value = "false") var deleted: Boolean = false
 )
 
 @Entity
 class MyChat(
-    @Id @Column(unique = true) val chatId: Long = 0,
+    @Column(unique = true) val chatId: Long = 0,
     var chatStep: String = "/start",
     var language: String = "en",
     var isNew: Boolean = true,
     var note: String = "",
+    var botMessageId: Int? = null,
     @ManyToOne var user: User? = null
-)
+) : BaseEntity()
 
 @Entity(name = "users")
 class User(
-    @Column(unique = true) val userName: String,
-    val password: String,
+    @Column(unique = true) var userName: String,
+    var password: String,
     var language: String = "en",
-    @ElementCollection var roles: MutableList<String>,
+    var blocked: Boolean = false,
+    @ElementCollection(fetch = FetchType.EAGER) var roles: MutableList<String>,
     @OneToMany(mappedBy = "user") var chats: List<MyChat>? = null,
+    @ManyToOne(fetch = FetchType.EAGER) var boss: User? = null,
+    @OneToMany(mappedBy = "boss", fetch = FetchType.LAZY) var workers: List<User>? = null,
     @OneToMany(mappedBy = "user") var myChats: MutableList<MyChat>? = null,
-    @ManyToOne() val shop: Shop,
-    @OneToMany(mappedBy = "", fetch = FetchType.LAZY) val shops: List<Shop>,
-    @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY) val orders: List<Order>
-) : BaseEntity()
+    @ManyToOne() val store: Store? = null,
+    @OneToMany(mappedBy = "", fetch = FetchType.LAZY) val stores: List<Store>? = null,
+    @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY) val orders: List<Order>? = null
+) : BaseEntity() {
+    companion object {
+        fun toEntity(rs: ResultSet): User {
+            val user = User(
+                rs.getString("user_name"),
+                rs.getString("password"),
+                roles = mutableListOf(Role.BOSS.name),
+            )
+            user.id = rs.getLong("id")
+            return user
+        }
+    }
+}
 
 @Entity
-class Shop(
-    val name: String,
+class Store(
+    var name: String,
+    @Enumerated(EnumType.STRING) val storeType: StoreType = StoreType.SHOP,
     @ManyToOne val boss: User,
-    @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY) val workers: List<User>
-) : BaseEntity()
+    @OneToMany(mappedBy = "store", fetch = FetchType.LAZY) val workers: List<User>? = null
+) : BaseEntity() {
+    companion object {
+        fun toEntity(rs: ResultSet, entityManager: EntityManager): Store {
+            return Store(
+                rs.getString("name"),
+                StoreType.valueOf(rs.getString("store_type")),
+                entityManager.getReference(User::class.java, rs.getLong("boss_id"))
+            ).apply { id = rs.getLong("id") }
+        }
+    }
+
+    fun getStoreTypeEmoji() = if (storeType != StoreType.INVENTORY) {
+        "\uD83D\uDCE6"
+    } else {
+        "\uD83C\uDFEA"
+    }
+
+}
 
 @Entity(name = "my_order")
 class Order(

@@ -1,7 +1,5 @@
 package uz.rustik.bozorbot
 
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.NoRepositoryBean
@@ -15,13 +13,15 @@ interface BaseRepository<T : BaseEntity> : JpaRepository<T, Long>, JpaSpecificat
 interface UserRepository : BaseRepository<User> {
     fun findByUserNameAndPasswordAndDeletedFalse(userName: String, password: String): User?
     fun existsByUserNameAndDeletedFalse(userName: String): Boolean
+    fun findByUserName(userName: String): User?
 }
 
-interface ChatRepository : JpaRepository<MyChat, Long> {
+interface ChatRepository : BaseRepository<MyChat> {
     fun findByChatId(telegramId: Long): MyChat?
 }
 
-interface ShopRepository : BaseRepository<Shop> {
+interface StoreRepository : BaseRepository<Store> {
+    fun existsByNameAndDeletedFalse(name: String): Boolean
 }
 
 interface OrderRepository : BaseRepository<Order> {

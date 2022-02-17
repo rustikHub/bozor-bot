@@ -3,6 +3,7 @@ package uz.rustik.bozorbot
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.ResourceBundleMessageSource
+import org.springframework.data.domain.AuditorAware
 import java.util.*
 
 @Configuration

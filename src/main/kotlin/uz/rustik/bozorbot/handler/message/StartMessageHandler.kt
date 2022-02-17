@@ -29,9 +29,9 @@ class StartMessageHandler(
 
         val lang = Locale(chat.language)
         if (message.hasText()) {
-            val text = message.text
-            when {
-                text == _START -> {
+            when (val text = message.text) {
+                _START -> {
+                    sender.deleteMessage(message.messageId, chatId)
                     when {
                         chat.isNew -> {
                             chat.chatStep = CHOOSE_LANGUAGE.name
@@ -50,37 +50,56 @@ class StartMessageHandler(
                             chat.chatStep = ENTER_USERNAME.name
                         }
                     }
+                    chat.botMessageId = sender.sendMessage(responseMessage)
                     myChatService.save(chat)
-                    sender.sendMessage(responseMessage)
                 }
                 else -> {
                     when (Steps.valueOf(chat.chatStep)) {
                         ENTER_USERNAME -> {
-                            if (!userServiceImpl.containsUserName(text))
-                                throw UsernameNotFound(
-                                    sender,
-                                    message,
-                                    "User not found!!"
-                                )
+                            sender.deleteMessage(message.messageId, chatId)
+                            chat.botMessageId?.run { sender.deleteMessage(this, chatId) }
                             chat.note = text
                             chat.chatStep = ENTER_PASSWORD.name
-                            myChatService.save(chat)
-
                             responseMessage.text = messageSourceService
                                 .getMessage(LocaleMessageSourceKey.ENTER_PASSWORD, lang)
-                            sender.sendMessage(responseMessage)
+                            chat.botMessageId = sender.sendMessage(responseMessage)
+
+                            myChatService.save(chat)
                         }
                         ENTER_PASSWORD -> {
+                            sender.deleteMessage(message.messageId, chatId)
+                            chat.botMessageId?.run { sender.deleteMessage(this, chatId) }
+
                             val username = chat.note
                             val user = userServiceImpl.findByUsernameAndPassword(username, text)
                             if (user != null) {
                                 responseMessage.text = "Salom"
-
+                                responseMessage.replyMarkup =
+                                    mainMenuInlineMarkup(user.roles, messageSourceService, lang)
                                 chat.user = user
-                                myChatService.save(chat)
-
+                                chat.chatStep = CallbackTypes.MAIN_MENU.name
+                                chat.botMessageId = sender.sendMessage(responseMessage)
+                            } else {
+                                responseMessage.text = "‼ Username or password is incorrect"
                                 sender.sendMessage(responseMessage)
+                                responseMessage.text = messageSourceService.getMessage(
+                                    LocaleMessageSourceKey.ENTER_USERNAME,
+                                    Locale(chat.language)
+                                )
+                                chat.chatStep = ENTER_USERNAME.name
+                                chat.botMessageId = sender.sendMessage(responseMessage)
                             }
+                            myChatService.save(chat)
+                        }
+                        LOG_IN -> {
+                            sender.deleteMessage(message.messageId, chatId)
+                            responseMessage.text = messageSourceService.getMessage(
+                                LocaleMessageSourceKey.ENTER_USERNAME,
+                                Locale(chat.language)
+                            )
+                            chat.chatStep = ENTER_USERNAME.name
+                            chat.botMessageId = sender.sendMessage(responseMessage)
+                            myChatService.save(chat)
                         }
                         else -> {
                             sender.deleteMessage(message.messageId, chatId)
@@ -96,7 +115,8 @@ class StartMessageHandler(
             "/start",
             CHOOSE_LANGUAGE.name,
             ENTER_PASSWORD.name,
-            ENTER_USERNAME.name
+            ENTER_USERNAME.name,
+            LOG_IN.name
         )
     }
 }

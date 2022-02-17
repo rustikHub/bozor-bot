@@ -20,3 +20,6 @@ spring:
 bot:
   token: '5245848431:AAHF1_0SKGFnZHbQJnv4PemHMMTMhftE0Fo'
   username: 'rustam_sklad_bot'
+root:
+  username: 'root'
+  password: '1234'
