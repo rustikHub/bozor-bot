@@ -13,18 +13,7 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    maven {
-        url = uri("http://gitlab.ugnis.uz/api/v4/projects/255/packages/maven")
-        name = "GitLab"
-        isAllowInsecureProtocol = true
-        credentials(HttpHeaderCredentials::class) {
-            name = "Private-Token"
-            value = "glpat-WG89FBCm83-AW5vX91xx"
-        }
-        authentication {
-            create<HttpHeaderAuthentication>("header")
-        }
-    }
+    maven("https://gitlab.com/api/v4/projects/33823632/packages/maven")
     mavenCentral()
 }
 
@@ -46,7 +35,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.telegram:telegrambots:5.4.0.1")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("uz.ugnis:tg-bot-lib:0.1.17")
+    implementation("uz.ugnis:tg-bot-lib:0.1.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
