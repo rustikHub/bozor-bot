@@ -25,7 +25,8 @@ class BaseRepositoryImpl<T : BaseEntity>(
 @Service
 class UserServiceImpl(
     private val jdbcTemplate: JdbcTemplate,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val entityManager: EntityManager
 ) : UserService {
 
     override fun findByUsernameAndPassword(username: String, password: String): User? {
@@ -47,6 +48,16 @@ class UserServiceImpl(
     @Transactional
     override fun save(user: User): User {
         return userRepository.save(user)
+    }
+
+    @Transactional
+    override fun saveWorker(user: User, shopId: Long): User {
+        return userRepository.save(
+            user.apply {
+                this.store = entityManager
+                    .getReference(Store::class.java, shopId)
+            }
+        )
     }
 
     override fun findByUserId(id: Long): User {

@@ -154,7 +154,7 @@ class MainMenuMessageHandler(
                                 )
                             }
 
-                            chat.note = text
+                            chat.note += "#$text"
                             responseMessage.text = messageSourceService
                                 .getMessage(LocaleMessageSourceKey.INPUT_USER_PASSWORD_TEXT, lang)
                             chat.chatStep = Steps.INPUT_USER_PASSWORD.name
@@ -171,6 +171,7 @@ class MainMenuMessageHandler(
                             chat.botMessageId = sender.sendMessage(responseMessage)
                             myChatService.save(chat)
                         }
+
                         else -> {
                             sender.deleteMessage(message.messageId, chatId)
                         }

@@ -39,7 +39,7 @@ class User(
     @ManyToOne(fetch = FetchType.EAGER) var boss: User? = null,
     @OneToMany(mappedBy = "boss", fetch = FetchType.LAZY) var workers: List<User>? = null,
     @OneToMany(mappedBy = "user") var myChats: MutableList<MyChat>? = null,
-    @ManyToOne() val store: Store? = null,
+    @ManyToOne() var store: Store? = null,
     @OneToMany(mappedBy = "", fetch = FetchType.LAZY) val stores: List<Store>? = null,
     @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY) val orders: List<Order>? = null
 ) : BaseEntity() {
@@ -52,6 +52,23 @@ class User(
             )
             user.id = rs.getLong("id")
             return user
+        }
+    }
+
+    fun getEmoji(): String {
+        return when {
+            this.roles.contains(Role.ROOT) -> {
+                "\uD83E\uDDD9\uD83C\uDFFB\u200D♂️"
+            }
+            this.roles.contains(Role.BOSS) -> {
+                "\uD83E\uDDDB\uD83C\uDFFB"
+            }
+            this.roles.contains(Role.MODERATOR) -> {
+                "\uD83D\uDC68\u200D\uD83D\uDCBC"
+            }
+            else -> {
+                "\uD83D\uDC77"
+            }
         }
     }
 }

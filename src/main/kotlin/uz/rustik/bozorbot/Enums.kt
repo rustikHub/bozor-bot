@@ -58,6 +58,7 @@ enum class CallbackTypes {
     WORKERS_PAGE_BUTTON,
     CHOOSE_SORE_TYPE,
     ADD_USER_DONE,
+    USER_CHOOSE_ROLE
 }
 
 enum class LocaleMessageSourceKey {
@@ -104,6 +105,7 @@ enum class LocaleMessageSourceKey {
     CHOOSE_STORE_TYPE_TEXT,
     INPUT_USER_PASSWORD_TEXT,
     INPUT_USERNAME_TEXT,
+    CHOOSE_WORKER_ROLE_TEXT,
     //    ---------Messages(END)--------------
     /**-------------------------------------------------------------**/
     //   ---------Error Messages(START)--------------

@@ -115,8 +115,8 @@ fun newUserChooseRoleInlineMarkup(list: List<Role>): InlineKeyboardMarkup {
     val moderator = if (list.contains(Role.MODERATOR)) "✅ MODERATOR" else "MODERATOR"
     val sailor = if (list.contains(Role.SELLER)) "✅ SELLER" else "SELLER"
 
-    builder.addRowButton(moderator, "${ADD_BOSS_CHOOSE_ROLE}#MODERATOR")
-    builder.addRowButton(sailor, "${ADD_BOSS_CHOOSE_ROLE}#SELLER")
+    builder.addRowButton(moderator, "${USER_CHOOSE_ROLE}#MODERATOR")
+    builder.addRowButton(sailor, "${USER_CHOOSE_ROLE}#SELLER")
 
     if (list.isNotEmpty()) {
         builder.addRowButton("📥 Save", ADD_USER_DONE.name)
@@ -289,9 +289,9 @@ fun workersInlineMarkup(
     workers.safeSubList(page * 6, (page + 1) * 6)
         .chunked(2) {
             val buttons = mutableListOf<InlineKeyboardButton>()
-            buttons.add(button("🏬 ${it[0].userName}", "${CHOOSE_WORKER}#${it[0].id}"))
+            buttons.add(button("${it[0].getEmoji()} ${it[0].userName}", "${CHOOSE_WORKER}#${it[0].id}"))
             if (it.size == 2) {
-                buttons.add(button("🏬 ${it[1].userName}", "${CHOOSE_WORKER}#${it[1].id}"))
+                buttons.add(button("${it[1].getEmoji()} ${it[1].userName}", "${CHOOSE_WORKER}#${it[1].id}"))
             }
             builder.row(*buttons.toTypedArray())
         }

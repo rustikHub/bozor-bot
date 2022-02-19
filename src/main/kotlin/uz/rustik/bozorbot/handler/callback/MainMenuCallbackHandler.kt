@@ -19,7 +19,7 @@ class MainMenuCallbackHandler(
     private val messageSourceService: MessageSourceService,
     private val userService: UserServiceImpl,
     private val storeService: StoreService,
-    private val myChatService: MyChatService
+    private val myChatService: MyChatService,
 ) : CallbackHandler {
     @Transactional
     override fun callbackHandle(callback: CallbackQuery, sender: AbsSender) {
@@ -104,6 +104,7 @@ class MainMenuCallbackHandler(
             CallbackTypes.DO_NOTHING.name -> {
 
             }
+            CallbackTypes.USER_CHOOSE_ROLE.name,
             CallbackTypes.ADD_BOSS_CHOOSE_ROLE.name -> {
                 val role = Role.valueOf(keys[1])
                 val split = chat.note.split("^")
@@ -116,7 +117,11 @@ class MainMenuCallbackHandler(
                 } else {
                     roles.add(role)
                 }
-                editButton.replyMarkup = newBossChooseRoleInlineMarkup(roles)
+                editButton.replyMarkup = if (keys[0] == CallbackTypes.USER_CHOOSE_ROLE.name) {
+                    newUserChooseRoleInlineMarkup(roles)
+                } else {
+                    newBossChooseRoleInlineMarkup(roles)
+                }
                 chat.note = "${split[0]}^${roles.joinToString("!")}"
                 myChatService.save(chat)
                 sender.editMessageReplyMarkup(editButton)
@@ -394,7 +399,13 @@ class MainMenuCallbackHandler(
             CallbackTypes.ADD_WORKER.name -> {
                 val id = keys[1].toLong()
                 val store = storeService.findById(id)
-                editMessage.replyMarkup = newUserChooseRoleInlineMarkup(listOf())
+                editMessage.replyMarkup = emptyInlineMarkup()
+                editMessage.text = messageSourceService.getMessage(INPUT_USERNAME_TEXT, lang)
+                sender.editMessage(editMessage)
+
+                chat.chatStep = Steps.INPUT_USERNAME.name
+                chat.note = "${store.id}"
+                myChatService.save(chat)
             }
             CallbackTypes.CHOOSE_SORE_TYPE.name -> {
                 println(keys[1])
@@ -425,18 +436,19 @@ class MainMenuCallbackHandler(
 
 //                    .map { Role.valueOf(it) }.toMutableList()
                     val splitInfo = split[0].split("#")
+
                     var newUser = User(
-                        splitInfo[0],
                         splitInfo[1],
+                        splitInfo[2],
                         roles = roles,
                         boss = user
                     )
                     answerCallbackQuery.text = "✅ Saved."
-                    newUser = userService.save(newUser)
+                    newUser = userService.saveWorker(newUser, splitInfo[0].toLong())
 
-                    sendMessage.text = messageSourceService.getMessage(MAIN_MENU, lang)
+                    sendMessage.text = messageSourceService.getMessage(SHOP_INFO_TEXT, lang)
                     sendMessage.replyMarkup =
-                        mainMenuInlineMarkup(user.roles, messageSourceService, lang)
+                        editShopInlineMarkup(user, newUser.store!!, messageSourceService, lang)
                     chat.botMessageId = sender.sendMessage(sendMessage)
                 }
                 chat.chatStep = CallbackTypes.MAIN_MENU.name
@@ -482,7 +494,8 @@ class MainMenuCallbackHandler(
             CallbackTypes.WORKERS_PAGE_BUTTON.name,
             CallbackTypes.ADD_WORKER.name,
             CallbackTypes.CHOOSE_SORE_TYPE.name,
-            CallbackTypes.ADD_USER_DONE.name
+            CallbackTypes.ADD_USER_DONE.name,
+            CallbackTypes.USER_CHOOSE_ROLE.name
         )
     }
 }

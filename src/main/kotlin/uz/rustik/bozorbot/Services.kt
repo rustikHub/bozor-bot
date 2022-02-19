@@ -11,6 +11,7 @@ interface UserService {
     fun findByUsernameAndPassword(username: String, password: String): User?
     fun findAllBossUsers(): List<User>
     fun save(user: User): User
+    fun saveWorker(user: User, shopId: Long): User
     fun findByUserId(id: Long): User
     fun deleteById(id: Long)
     fun setDeleteById(id: Long, delete: Boolean)
